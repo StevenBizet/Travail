@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+
+<mobilier>
+    <chaises>
+        <chaise>
+            <nom> Toto </nom>
+            <prix> 35 </prix>
+        </chaise>
+        <chaise>
+            <nom> Tata </nom>
+            <prix> 32 </prix>
+        </chaise>
+        <chaise>
+            <nom> Titi </nom>
+            <prix> 30 </prix>
+        </chaise>
+    </chaises>
+</mobilier>
+
