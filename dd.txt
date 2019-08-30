@@ -1,0 +1,131 @@
+# vim: set ts=2 sw=2 et:
+
+version: "3.4"
+
+# ________________________ SERVICES _________________________
+
+services:
+
+# -------- POSTGRES --------
+  postgres:
+    image: postgres:latest
+    restart : "no"
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+# -------- PROJET --------
+  flask:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.flask
+    networks:
+      - backend
+
+# -------- HAproxy --------
+  haproxy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.haproxy
+    image: haproxy
+    networks:
+      - backend
+
+# _______________________ NETWORKS _________________________
+
+networks:
+  backend:
+
+# ________________________ VOLUMES __________________________
+
+volumes:
+  postgres_data:
+
+
+
+
+
+
+
+
+
+
+=========================================================================================
+
+
+
+FROM debian:10
+
+## ________________ PARTIE SYSTEME ___________________
+
+## (moins susceptible de changer)
+
+# --------- NOS INSTALLATIONS ----------------
+RUN apt-get update \
+    && apt-get install -y python \
+    && apt-get install -y python python-pip \
+    && pip install flask
+
+## ________________ PARTIE PROJET ______________________
+
+# On déplace notre projet pour pouvoir le lancer
+
+
+# On lance notre app.py
+RUN cd ./Desktop/best_project
+RUN python app.py
+
+
+# On indique aux différents outils que le port à ouvrir est 80
+EXPOSE 80
+
+CMD bash \
+    && while true ; do sleep 1 ; done
+
+
+
+
+===========================================================
+
+
+global
+    log 127.0.0.1 local0
+    maxconn 4096
+
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    retries 3
+    redispatch
+    maxconn 2000
+    contimeout 5000
+    clitimeout 50000
+    srvtimeout 50000
+
+listen http-in
+    bind *:80
+    server server1 127.0.0.1:8000 maxconn 32
+
+#frontend http-in
+#    bind *:80
+#    acl myapp-frontend hdr(host) -i mydomain.com
+#    use_backend myapp-backend if myapp-frontend
+
+#backend myapp-backend
+#    balance roundrobin
+#    option http-server-close
+#    server myapp-server-1 myapp-server-hostname:80 check
+
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDT6dJf2Tm6oSN966Wig2Sfaltql8w+gkS1IGmhiuyf
+JLEZFCrEOe4LvivpF/jLxyRewVkHybLegD6OS7cK1TjxtSNEpoPwDML61pSYmo2cdvNybZpQZpM1aKpe
+vDp5rbHSUaE4Le1+EpPF0y3bOkbqIDCYnjVFDrPEabaIsydqLtZn9w1S/zRH5MMguLgCkGCTcywwzFiz
++rp6X5AQWaVOts41K89j9tse6OLiPHwyppOltyzm3U4oLk08pUCnmaaYUR139UeQtc9Fr2kgE594YUdk
+9FkC6Qq3v2ZvvwgrY2P1kqhMp4PRLCE3M3bGdqJHhrPskdxVc/thRCnMaWqt vagrant@workstation
+
+
